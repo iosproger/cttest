@@ -5,7 +5,8 @@ from sqlalchemy import DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import validates
 
-from project.app.schemas.schemas import TaskType
+from ..schemas.schemas import TaskType
+
 
 Base = declarative_base()
 
