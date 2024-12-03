@@ -108,5 +108,15 @@ class PostCtwT(BaseModel):
 class OfferContractResponse:
     message: str
 
+class Signin(BaseModel):
+    user_name: str
+    password: str
 
+    class Config:
+        from_attributes = True
 
+class CTID(BaseModel):
+    contract_id: int
+
+    class Config:
+        from_attributes = True

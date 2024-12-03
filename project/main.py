@@ -15,9 +15,9 @@ origins = [
     "http://localhost:8080",
     "http://localhost:3000",  # Common React dev server port
     "http://localhost:5173",  # Add this line for Vite
-    "http://192.168.100.31",  # Add this line for your backend IP
+    "http://10.10.3.71",  # Add this line for your backend IP
 ]
-
+# http://10.10.3.71:8000
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -37,12 +37,6 @@ async def root():
 # if __name__ == '__main__':
 #     uvicorn.run("main:app", reload=True)
 
-# if __name__ == '__main__':
-#     uvicorn.run("main:app", reload=True, host="0.0.0.0")
+if __name__ == '__main__':
+    uvicorn.run("main:app", reload=True, host="0.0.0.0")
 
-# python -m uvicorn main:app --host 0.0.0.0 --port 8001
-
-
-# uvicorn main:app --host 0.0.0.0 --port 8001
-# pip install uvicorn
-# enter to venv -> venv/bin/activate

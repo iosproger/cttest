@@ -144,13 +144,13 @@ async def history_of_contract(
 
 @router.get("/task_contract", response_model=schemas.PostCtwT)
 async def taskIdCt(
-    contract_id: int,
+    contract_id: schemas.CTID,
     user: schemas.User = Depends(get_current_active_auth_user),
     db: Session = Depends(get_db),
 ):
     try:
 
-        ct = crud.get_contract_by_id(db=db, contract_id=contract_id)
+        ct = crud.get_contract_by_id(db=db, contract_id=contract_id.contract_id)
         if not ct:
             raise HTTPException(status_code=404, detail="No contracts found")
 

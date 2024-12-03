@@ -23,20 +23,21 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 def validate_auth_user(
-    user_name: str = Form(),
-    password: str = Form(),
+    # user_name: str = Form(),
+    # password: str = Form(),
+    u: schemas.Signin,
     db: Session = Depends(get_db)
 ) -> schemas.UserBase:
-    print(user_name)
+    print("user_name:",u.user_name ,"   pwd:",u.password)
     unauthed_exc = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="invalid username or password",
     )
-    if not (user := crud.get_user_by_name(db=db, user_name=user_name)):
+    if not (user := crud.get_user_by_name(db=db, user_name=u.user_name)):
         raise unauthed_exc
 
     if not auth_utils.validate_password(
-        password=password,
+        password=u.password,
         hashed_password=user.hashed_password,
     ):
         raise unauthed_exc
