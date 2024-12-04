@@ -177,7 +177,6 @@ async def taskIdCt(
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {str(e)}")
-        
 
 @router.get("/shop")
 async def allCT(
@@ -193,8 +192,6 @@ async def allCT(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {str(e)}")
     return response
-
-
 
 
 # @router.post("/ofer",response_model=dict)
