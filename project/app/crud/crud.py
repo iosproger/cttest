@@ -52,6 +52,11 @@ def get_tasks_by_ct_id(db: Session, contract_id: int):
     except Exception as e:
         raise Exception(f"An error occurred while fetching tasks by contract_id: {e}")
 
+def get_all_contracts(db: Session):
+    try:
+        return db.query(Contract).all()  # Fetch all contracts
+    except Exception as e:
+        raise Exception(f"An error occurred while fetching all contracts: {e}")
 
 
 def create_contract(db: Session ,owner_create_id: int, name: str,description: str , date: str):
