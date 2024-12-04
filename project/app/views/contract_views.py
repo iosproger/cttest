@@ -193,7 +193,7 @@ async def allCT(
         raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {str(e)}")
     return response
 
-
+# test
 # @router.post("/ofer",response_model=dict)
 # def offer(
 #         db: Session = Depends(get_db)
