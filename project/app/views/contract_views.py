@@ -177,6 +177,23 @@ async def taskIdCt(
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {str(e)}")
+        
+
+@router.get("/shop")
+async def allCT(
+    user: schemas.User = Depends(get_current_active_auth_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        response = crud.get_all_contracts(db=db)
+        if not response:
+            raise HTTPException(status_code=404, detail="No contracts found")
+    except SQLAlchemyError as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {str(e)}")
+    return response
+
 
 
 
