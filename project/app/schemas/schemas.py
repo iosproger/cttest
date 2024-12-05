@@ -120,3 +120,21 @@ class CTID(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class Assingct(BaseModel):
+    contract_id: int = Field(..., gt=0, description="ID of the contract")
+
+    class Config:
+        from_attributes = True
+
+
+class AcceptedContract(BaseModel):
+    owner_create_id: int
+    contract_id: int
+    name: str
+    description: str
+    date: str
+
+    class Config:
+        from_attributes = True
