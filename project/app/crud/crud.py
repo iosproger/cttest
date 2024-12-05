@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from project.app.schemas import schemas
-from project.app.models.models import User ,Contract ,Task
+from project.app.models.models import User ,Contract ,Task ,AssingCt
 from passlib.context import CryptContext
 
 
@@ -88,3 +88,39 @@ def get_all_contract(db: Session, owner_create_id: int, skip: int = 0, limit: in
         return db.query(Contract).filter(Contract.owner_create_id == owner_create_id).offset(skip).limit(limit).all()
     except Exception as e:
         raise Exception(f"An error occurred while fetching contracts: {e}")
+
+
+# accept
+def create_accept(db: Session, user_id: int, contract_id: int):
+    try:
+        # Check if the assignment already exists
+        existing = db.query(AssingCt).filter(
+            AssingCt.user_id == user_id, AssingCt.contract_id == contract_id
+        ).first()
+        if existing:
+            raise ValueError("Assignment already exists for this user and contract.")
+
+        # Create the new assignment
+        new_accept = AssingCt(user_id=user_id, contract_id=contract_id)
+        db.add(new_accept)
+        db.commit()
+        db.refresh(new_accept)
+        return new_accept
+
+    except Exception as e:
+        db.rollback()  # Ensure transaction is rolled back
+        raise Exception(f"An error occurred while creating accept: {e}")
+
+# 0000
+def get_all_ct_acp_with_details(db: Session, user_id: int):
+    try:
+        return (
+            db.query(AssingCt, Contract)
+            .join(Contract, AssingCt.contract_id == Contract.contract_id)
+            .filter(AssingCt.user_id == user_id)
+            .all()
+        )
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while fetching accepted contracts: {e}")
+
