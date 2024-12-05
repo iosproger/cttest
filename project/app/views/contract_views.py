@@ -112,16 +112,63 @@ async def offer_contart(
 
 
 
-@router.post("/accept",response_model=dict)
-async def accept_controct(
-    contract_id: int = Form(),
+@router.post("/accept")
+async def accept_contract(
+    accept: schemas.Assingct,
     user: schemas.User = Depends(get_current_active_auth_user),
     db: Session = Depends(get_db),
 ):
+    try:
+        ct = crud.get_contract_by_id(db=db, contract_id=accept.contract_id)
+        if not ct:
+            raise HTTPException(status_code=404, detail="Contract not found")
+
+        response = crud.create_accept(db=db, user_id=user.id, contract_id=accept.contract_id)
+
+        if not response:
+            raise HTTPException(status_code=500, detail="Failed to create assignment")
+        return response
+
+    except SQLAlchemyError as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {str(e)}")
+
+@router.get("/accepted_ct_user_id", response_model=List[schemas.AcceptedContract])
+async def accepted_ct(
+    user: schemas.User = Depends(get_current_active_auth_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        # Fetch accepted contracts with details
+        accepted = crud.get_all_ct_acp_with_details(db=db, user_id=user.id)
+
+        if not accepted:
+            raise HTTPException(status_code=404, detail="No accepted contracts found")
+
+        # Prepare the response
+        response = [
+            schemas.AcceptedContract(
+                contract_id=contract.contract_id,
+                owner_create_id=contract.owner_create_id,
+                name=contract.name,
+                description=contract.description,
+                date=contract.date
+            )
+            for _, contract in accepted
+        ]
+
+        return response
+
+    except SQLAlchemyError as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {str(e)}")
 
 
 
-    return {"message": "successful test"}
 
 
 @router.get("/all_contract_owner_id", response_model=List[schemas.Contract], status_code=200)
