@@ -1,13 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
-from sqlalchemy import DateTime
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm import validates
-
-# from ..schemas.schemas import TaskType
-from project.app.schemas.schemas import TaskType
-
+from sqlalchemy.orm import relationship, validates
+from ..schemas.schemas import TaskType
 
 Base = declarative_base()
 
@@ -23,25 +18,29 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    # Relationships
+    contracts = relationship("Contract", back_populates="user")
+    assingcts = relationship("AssingCt", back_populates="user")
 
-# contract
+
 class Contract(Base):
     __tablename__ = "contract"
     contract_id = Column(Integer, primary_key=True, index=True)
-    owner_create_id = Column(Integer, index=True, nullable=False)
+    owner_create_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
     name = Column(String, index=True, nullable=False)
     description = Column(String, index=True, nullable=False)
     date = Column(String, index=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    # Relationships
     tasks = relationship("Task", back_populates="contract")
+    user = relationship("User", back_populates="contracts")
+    assingcts = relationship("AssingCt", back_populates="contract")
 
 
-
-# Tasks
 class Task(Base):
-    __tablename__ = "task"  # Correct table name
+    __tablename__ = "task"
     task_id = Column(Integer, primary_key=True, index=True)
     owner_id = Column(Integer, nullable=False, index=True)
     contract_id = Column(Integer, ForeignKey("contract.contract_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
@@ -56,6 +55,17 @@ class Task(Base):
 
     @validates("type")
     def validate_type(self, key, value):
-        if value not in TaskType._value2member_map_:  # Validate against TaskType values
+        if value not in TaskType._value2member_map_:
             raise ValueError(f"Invalid task type: {value}")
         return value
+
+
+class AssingCt(Base):
+    __tablename__ = "assingct"
+    assingct_id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
+    contract_id = Column(Integer, ForeignKey("contract.contract_id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
+
+    # Relationships
+    contract = relationship("Contract", back_populates="assingcts")
+    user = relationship("User", back_populates="assingcts")
