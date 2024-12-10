@@ -180,8 +180,8 @@ async def history_of_contract(
 
     try:
         response = crud.get_all_contract(db=db, owner_create_id=user.id, skip=res.skip, limit=res.limit)
-        if not response:
-            raise HTTPException(status_code=404, detail="No contracts found")
+        # if not response:
+        #     raise HTTPException(status_code=404, detail="No contracts found")
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:

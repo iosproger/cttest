@@ -45,6 +45,7 @@ class ContractBase(BaseModel):
 class Contract(ContractBase):
     contract_id : int
     owner_create_id : int
+    description : str
     created_at: datetime
     updated_at: Optional[datetime]
 
