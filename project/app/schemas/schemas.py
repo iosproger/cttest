@@ -97,6 +97,8 @@ class PostCTWT(BaseModel):
         from_attributes = True
 
 class PostCtwT(BaseModel):
+    statuss: bool = False
+    num_of_ct_assepted_people: int = 0
     name_ct: str
     description: str
     date: str

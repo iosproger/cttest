@@ -196,23 +196,33 @@ async def taskIdCt(
     db: Session = Depends(get_db),
 ):
     try:
-
+        # Fetch the contract
         ct = crud.get_contract_by_id(db=db, contract_id=contract_id.contract_id)
         if not ct:
             raise HTTPException(status_code=404, detail="No contracts found")
 
-
+        # Check ownership
         if user.id != ct.owner_create_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"User does not own the contract {ct.name}"
+                detail=f"User does not own the contract {ct.name}",
             )
 
-
+        # Fetch tasks for the contract
         tasks = crud.get_tasks_by_ct_id(db=db, contract_id=ct.contract_id)
 
+        # Get the number of accepted customers
+        num_of_ct_assepted_people = crud.get_number_of_acp_custmer(
+            db=db, contract_id=contract_id.contract_id
+        )
 
+        # Set status
+        st = num_of_ct_assepted_people > 0
+
+        # Build the response
         response = schemas.PostCtwT(
+            statuss=st,
+            num_of_ct_assepted_people=num_of_ct_assepted_people,
             name_ct=ct.name,
             task=tasks,
             description=ct.description,

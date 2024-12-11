@@ -124,3 +124,13 @@ def get_all_ct_acp_with_details(db: Session, user_id: int):
         db.rollback()
         raise Exception(f"An error occurred while fetching accepted contracts: {e}")
 
+def get_number_of_acp_custmer(db: Session, contract_id: int) -> int:
+    try:
+        return (
+            db.query(AssingCt)
+            .filter(AssingCt.contract_id == contract_id)
+            .count()  # Return count directly
+        )
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while fetching accepted contracts: {e}")
