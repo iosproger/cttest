@@ -107,6 +107,25 @@ class PostCtwT(BaseModel):
     class Config:
         from_attributes = True
 
+class TaskWithStatus(BaseModel):
+    task_id: int
+    task_name: str
+    type: TaskType
+    deadline: str
+    task_user_status: bool
+
+    class Config:
+        from_attributes = True
+
+class GetCtaTResponse(BaseModel):
+    contract_id: int
+    name: str
+    description: str
+    date: str
+    task: List[TaskWithStatus]
+
+    class Config:
+        from_attributes = True
 
 class OfferContractResponse:
     message: str
@@ -138,6 +157,55 @@ class AcceptedContract(BaseModel):
     name: str
     description: str
     date: str
+
+    class Config:
+        from_attributes = True
+
+
+class AcceptTaskPost(BaseModel):
+    task_id: int
+    contract_id: int
+    task_user_status: bool = False
+
+class GetToResponseNotification(BaseModel):
+    notification_id: int
+    status: bool
+    description: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PostNotificationAction(BaseModel):
+    notification_id: int
+    status: bool
+
+    class Config:
+        from_attributes = True
+
+class Users_status(BaseModel):
+    user_id: int
+    status: bool
+
+    class Config:
+        from_attributes = True
+
+class TaskWithStatusOwn(BaseModel):
+    task_id: int
+    task_name: str
+    type: TaskType
+    deadline: str
+    users_status: List[Users_status]
+
+    class Config:
+        from_attributes = True
+
+class GetCtaTResponseOwn(BaseModel):
+    contract_id: int
+    name: str
+    description: str
+    date: str
+    task: List[TaskWithStatusOwn]
 
     class Config:
         from_attributes = True

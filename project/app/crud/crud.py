@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from project.app.schemas import schemas
-from project.app.models.models import User ,Contract ,Task ,AssingCt
+from project.app.models.models import User, Contract, Task, AssingCt, ActionTask, Notification
 from passlib.context import CryptContext
 
 
@@ -126,11 +126,228 @@ def get_all_ct_acp_with_details(db: Session, user_id: int):
 
 def get_number_of_acp_custmer(db: Session, contract_id: int) -> int:
     try:
-        return (
-            db.query(AssingCt)
-            .filter(AssingCt.contract_id == contract_id)
-            .count()  # Return count directly
-        )
+        return db.query(AssingCt).filter(AssingCt.contract_id == contract_id).count()
     except Exception as e:
         db.rollback()
         raise Exception(f"An error occurred while fetching accepted contracts: {e}")
+
+
+
+
+def check_accept_task(
+    db: Session,
+    current_user_id: int,
+    task_id: int,
+    contract_id: int
+) -> bool:
+    try:
+        # Check if the task exists and does not belong to the current user
+        task = (
+            db.query(Task)
+            .filter(
+                Task.contract_id == contract_id,
+                Task.task_id == task_id,
+                Task.owner_id != current_user_id
+            )
+            .one_or_none()
+        )
+        if not task:
+            return False
+
+        # Check if the user is assigned to the contract
+        assingct = (
+            db.query(AssingCt)
+            .filter(
+                AssingCt.user_id == current_user_id,
+                AssingCt.contract_id == contract_id
+            )
+            .one_or_none()
+        )
+        return assingct is not None
+
+    except Exception as e:
+        raise Exception(f"An error occurred while checking the task: {e}")
+
+def update_notification_status(
+    db: Session,
+    notification_id: int,
+    notification_status: bool
+):
+    try:
+        # Fetch the notification first to ensure it exists
+        notification = db.query(Notification).filter(Notification.notification_id == notification_id).first()
+        if not notification:
+            raise Exception(f"Notification with ID {notification_id} not found")
+
+        # Update the status
+        notification.status = notification_status
+        db.commit()
+
+        # Refresh and return the updated notification
+        db.refresh(notification)
+        return notification
+
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while updating notification status: {e}")
+
+
+def accept_task(
+    db: Session,
+    accepted_user_id: int,
+    task_id: int,
+    task_user_status: bool
+):
+    try:
+        # Check accept_task found
+        existing_entry = (
+            db.query(ActionTask)
+            .filter(
+                ActionTask.user_id == accepted_user_id,
+                ActionTask.task_id == task_id
+            )
+            .one_or_none()
+        )
+        if not existing_entry:
+            raise Exception("Task accept_task not found ")
+
+        # Update the task_user_status
+        existing_entry.task_user_status = task_user_status
+        db.commit()
+        db.refresh(existing_entry)
+
+        return existing_entry
+
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while creating the new_accept_task: {e}")
+
+
+def accept_task_create(
+    db: Session,
+    accepted_user_id: int,
+    task_id: int,
+    task_user_status: bool
+):
+    try:
+        # Check for duplicate entries
+        existing_entry = (
+            db.query(ActionTask)
+            .filter(
+                ActionTask.user_id == accepted_user_id,
+                ActionTask.task_id == task_id
+            )
+            .one_or_none()
+        )
+        if existing_entry:
+            raise Exception("Task has already been accepted.")
+
+        # Create a new ActionTask
+        new_accept_task = ActionTask(
+            user_id=accepted_user_id,
+            task_id=task_id,
+            task_user_status=task_user_status
+        )
+        db.add(new_accept_task)
+        db.commit()
+        db.refresh(new_accept_task)
+        return new_accept_task
+
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while creating the new_accept_task: {e}")
+
+def create_notification(
+    db: Session,
+    owner_user_id: int,
+    accepted_user_id: int | None,
+    contract_id: int,
+    task_id: int,
+    status: bool,
+    description: str
+):
+    try:
+        new_notification = Notification(
+            user_id=owner_user_id,
+            accepted_user_id=accepted_user_id,
+            contract_id=contract_id,
+            task_id=task_id,
+            status=status,
+            description=description
+        )
+        db.add(new_notification)
+        db.commit()
+        db.refresh(new_notification)
+        return new_notification
+    except Exception as e:
+        db.rollback()
+        raise Exception(
+            f"An error occurred while creating the notification for contract {contract_id}, task {task_id}: {e}"
+        )
+
+def get_notifications_by_user_id(db: Session, user_id: int):
+    try:
+        return db.query(Notification).filter(Notification.user_id == user_id).all()
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while fetching notifications: {e}")
+
+
+def get_notification_by_id(db: Session, notification_id: int):
+    try:
+        return db.query(Notification).filter(Notification.notification_id == notification_id).first()
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while fetching notification: {e}")
+
+
+def create_actiontask_accept(db:Session, user_id:int,task_id:int,task_user_status:bool):
+    try:
+        # Check for duplicate entries
+        existing_entry = (
+            db.query(ActionTask)
+            .filter(
+                ActionTask.user_id == user_id,
+                ActionTask.task_id == task_id
+            )
+            .one_or_none()
+        )
+        if existing_entry:
+            raise Exception("Task has already been accepted.")
+
+        new_actiontask = ActionTask(
+            user_id = user_id,
+            task_id = task_id,
+            task_user_status = task_user_status
+        )
+        db.add(new_actiontask)
+        db.commit()
+        db.refresh(new_actiontask)
+        return new_actiontask
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while creating actiontask: {e}")
+
+
+
+def get_assingct_user_id(db: Session, user_id: int, contract_id: int):
+    try:
+        return db.query(AssingCt).filter(AssingCt.user_id == user_id, AssingCt.contract_id == contract_id).first()
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while fetching assingct: {e}")
+
+def get_actiontask_by_user_id_task_id(db: Session, user_id: int,task_id: int):
+    try:
+        return db.query(ActionTask).filter(ActionTask.user_id == user_id,ActionTask.task_id==task_id).first()
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while fetching actiontask: {e}")
+
+
+def get_assind_users_by_contract_id(db: Session, contract_id: int):
+    try:
+        return db.query(AssingCt).filter(AssingCt.contract_id == contract_id).all()
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while fetching assingct: {e}")
