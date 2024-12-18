@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from project.app.schemas import schemas
 from project.app.models.models import User, Contract, Task, AssingCt, ActionTask, Notification
 from passlib.context import CryptContext
+from sqlalchemy import and_, not_
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
