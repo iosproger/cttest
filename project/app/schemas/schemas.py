@@ -7,6 +7,7 @@ from typing import List
 
 # User
 class UserBase(BaseModel):
+    id : int
     user_name: str
     name: str
     phone_number: str | None = None

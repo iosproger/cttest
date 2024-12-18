@@ -141,6 +141,7 @@ def auth_user_check_self_info(
 ):
     iat = payload.get("iat")
     return {
+        "owner_id": user.id,
         "username": user.user_name,
         "name" : user.name,
         "email": user.email,
