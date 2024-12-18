@@ -235,12 +235,12 @@ async def taskIdCt(
         if not ct:
             raise HTTPException(status_code=404, detail="No contracts found")
 
-        # Check ownership
-        if user.id != ct.owner_create_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"User does not own the contract {ct.name}",
-            )
+        # # Check ownership
+        # if user.id != ct.owner_create_id:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_403_FORBIDDEN,
+        #         detail=f"User does not own the contract {ct.name}",
+        #     )
 
 
 
