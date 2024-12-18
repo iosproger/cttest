@@ -51,6 +51,27 @@ def get_tasks_by_ct_id(db: Session, contract_id: int):
         return db.query(Task).filter(Task.contract_id == contract_id).all()
     except Exception as e:
         raise Exception(f"An error occurred while fetching tasks by contract_id: {e}")
+    
+def get_all_contracts_except_assigned_and_user(db: Session, user_id: int):
+    try:
+        # Subquery to fetch all contract IDs assigned to the user
+        assigned_ct_ids = db.query(AssingCt.contract_id).filter(AssingCt.user_id == user_id).subquery()
+
+        # Main query to get contracts not owned by the user and not assigned to the user
+        contracts = (
+            db.query(Contract)
+            .filter(
+                and_(
+                    Contract.owner_create_id != user_id,       # Exclude contracts owned by the user
+                    not_(Contract.contract_id.in_(assigned_ct_ids))  # Exclude assigned contracts
+                )
+            )
+            .all()
+        )
+
+        return contracts
+    except Exception as e:
+        raise Exception(f"An error occurred while fetching all contracts: {e}")    
 
 def get_all_contracts(db: Session):
     try:

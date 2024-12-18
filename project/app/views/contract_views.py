@@ -281,7 +281,7 @@ async def allCT(
     db: Session = Depends(get_db),
 ):
     try:
-        response = crud.get_all_contracts(db=db)
+        response = crud.get_all_contracts_except_assigned_and_user(db=db,user_id=user.id)
         if not response:
             raise HTTPException(status_code=404, detail="No contracts found")
     except SQLAlchemyError as e:
