@@ -498,8 +498,6 @@ async def task_contract_owner_id(
 
         # Fetch assigned users for the contract
         assigned_users = crud.get_assind_users_by_contract_id(db=db, contract_id=ct_id.contract_id)
-        if not assigned_users:
-            raise HTTPException(status_code=404, detail="No users assigned to the contract")
 
         # Build the response
         response = schemas.GetCtaTResponseOwn(
@@ -517,17 +515,15 @@ async def task_contract_owner_id(
                         schemas.Users_status(
                             user_id=assigned_user.user_id,
                             status=(
-                                crud.get_actiontask_by_user_id_task_id(
+                                action_task.task_user_status
+                                if (action_task := crud.get_actiontask_by_user_id_task_id(
                                     db=db, user_id=assigned_user.user_id, task_id=task.task_id
-                                ).task_user_status
-                                if crud.get_actiontask_by_user_id_task_id(
-                                    db=db, user_id=assigned_user.user_id, task_id=task.task_id
-                                )
+                                ))
                                 else False
                             ),
                         )
                         for assigned_user in assigned_users
-                    ],
+                    ] if assigned_users else [],
                 )
                 for task in tasks
             ],
