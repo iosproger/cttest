@@ -7,7 +7,7 @@ from typing import List
 
 # User
 class UserBase(BaseModel):
-    id : int
+    id : int | None = None
     user_name: str
     name: str
     phone_number: str | None = None
@@ -207,6 +207,15 @@ class GetCtaTResponseOwn(BaseModel):
     description: str
     date: str
     task: List[TaskWithStatusOwn]
+
+    class Config:
+        from_attributes = True
+
+class GetTasksUser(BaseModel):
+    contract_name: str
+    task_name: str
+    type: TaskType
+    task_user_status: bool
 
     class Config:
         from_attributes = True

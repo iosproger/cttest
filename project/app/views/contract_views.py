@@ -538,6 +538,56 @@ async def task_contract_owner_id(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {str(e)}")
 
+# show users tasks
+@router.get("/tasks_user", response_model=List[schemas.GetTasksUser])
+async def get_tasks_for_user(
+    user: schemas.User = Depends(get_current_active_auth_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        # Fetch all contracts where the user is assigned
+        assigned_contracts = crud.get_assind_users_by_user_id(db=db, user_id=user.id)
+        if not assigned_contracts:
+            return []  # No contracts found for the user
+
+        # Initialize response list
+        tasks_user = []
+
+        for assigned_contract in assigned_contracts:
+            # Fetch the contract by ID
+            contract = crud.get_contract_by_id(db=db, contract_id=assigned_contract.contract_id)
+            if not contract:
+                continue  # Skip if the contract doesn't exist
+
+            # Fetch tasks for the contract
+            tasks = crud.get_tasks_by_ct_id(db=db, contract_id=assigned_contract.contract_id)
+            if not tasks:
+                continue  # Skip if there are no tasks for the contract
+
+            for task in tasks:
+                # Get the user's action task status
+                action_task = crud.get_actiontask_by_user_id_task_id(db=db, user_id=user.id, task_id=task.task_id)
+                task_status = action_task.task_user_status if action_task else False
+
+                # Add task details to the response
+                tasks_user.append(
+                    schemas.GetTasksUser(
+                        contract_name=contract.name,
+                        task_name=task.task_name,
+                        type=task.type,
+                        task_user_status=task_status,
+                    )
+                )
+
+        return tasks_user
+
+    except SQLAlchemyError as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"An unexpected error occurred: {str(e)}")
+
+
+
 
 
 # test

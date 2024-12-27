@@ -366,10 +366,24 @@ def get_actiontask_by_user_id_task_id(db: Session, user_id: int,task_id: int):
         db.rollback()
         raise Exception(f"An error occurred while fetching actiontask: {e}")
 
-
 def get_assind_users_by_contract_id(db: Session, contract_id: int):
     try:
         return db.query(AssingCt).filter(AssingCt.contract_id == contract_id).all()
     except Exception as e:
         db.rollback()
         raise Exception(f"An error occurred while fetching assingct: {e}")
+
+def get_assind_users_by_user_id(db: Session, user_id: int):
+    try:
+        return db.query(AssingCt).filter(AssingCt.user_id == user_id).all()
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while fetching assigned contracts: {e}")
+
+
+def get_actiontasks_by_user_id(db: Session, user_id: int):
+    try:
+        return db.query(ActionTask).filter(ActionTask.user_id == user_id).all()
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"An error occurred while fetching actiontask: {e}")
